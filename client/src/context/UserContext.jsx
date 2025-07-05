@@ -6,6 +6,8 @@ export const UserContext = createContext();
 const UserProvider = ({ children }) => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [messages,setMessages]=useState([]);
+
 
   const fetchData = async () => {
     setLoading(true);
@@ -14,9 +16,19 @@ const UserProvider = ({ children }) => {
       setUserData(response.data.data);
     } catch (error) {
       console.log(error);
-      setUserData(null)
+      setUserData(null);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchMessages = async (receiverId) => {
+    try {
+      const response = await axios.get("/get-messages/" + receiverId);
+      setMessages(response.data);
+    } catch (error) {
+      console.log(error);
+      setMessages(null);
     }
   };
 
@@ -25,7 +37,7 @@ const UserProvider = ({ children }) => {
   }, []);
 
   return (
-    <UserContext.Provider value={{ userData, setUserData, loading }}>
+    <UserContext.Provider value={{ userData, setUserData, loading,fetchMessages ,messages }}>
       {children}
     </UserContext.Provider>
   );

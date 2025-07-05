@@ -8,6 +8,10 @@ dotenv.config();
 import bcrypt from "bcryptjs";
 import genToken from "./confilg/token.js";
 import isAuth from "./middleware/authMiddleware.js";
+import Conversation from "./models/conversation.model.js";
+import Message from "./models/message.model.js";
+import { getMessage, sendMessage } from "./controller/message.controller.js";
+import upload from "./confilg/multer.js";
 
 const app = express();
 app.use(
@@ -57,10 +61,12 @@ app.post("/login", async (req, res) => {
         .json({ message: "password length should be greaterthan 8" });
     }
     const user = await User.findOne({ email });
+
     if (!user) {
       return res.status(400).json({ message: "Email not found" });
     }
     const isMatch = await bcrypt.compare(password, user.password);
+
     if (!isMatch) {
       return res.status(400).json({ message: "the password is incorrect" });
     }
@@ -77,7 +83,6 @@ app.post("/login", async (req, res) => {
 });
 
 app.get("/current-user", isAuth, async (req, res) => {
-
   try {
     const id = req.userId;
     console.log("the backen user id", id);
@@ -88,16 +93,22 @@ app.get("/current-user", isAuth, async (req, res) => {
   }
 });
 
-app.get("/get-users", isAuth, async (req, res) => {
-
+app.get("/get-users/:userId", isAuth, async (req, res) => {
   try {
-
-    const users = await User.find().select("-password");
+    const userId=req.params.userId
+    // Exclude the current user from the result
+    const users = await User.find({ _id: { $ne: userId } }).select("-password");
+    console.log(users)
     return res.status(200).json({ data: users });
   } catch (error) {
     return res.status(500).json({ message: "internal server error" });
   }
 });
+
+// message controllers
+
+app.post("/send/:receiver", isAuth, upload.single("image"), sendMessage);
+app.get("/get-messages/:receiver", isAuth, getMessage);
 
 const PORT = process.env.PORT || 5000;
 
