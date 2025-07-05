@@ -2,6 +2,7 @@ import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
 import { uploadCloudinary } from "../confilg/cloudinary.js";
 import fs from "fs";
+import { getReceiverSocketId, io } from "../confilg/socket.js";
 
 export const sendMessage = async (req, res) => {
   try {
@@ -38,6 +39,16 @@ export const sendMessage = async (req, res) => {
     } else {
       conversation.messages.push(newMessage._id);
       await conversation.save();
+    }
+
+    const receiverSocketId = getReceiverSocketId(receiver);
+    const senderSocketId = getReceiverSocketId(sender); // sender = req.userId
+
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("newMessage", newMessage);
+    }
+    if (senderSocketId) {
+      io.to(senderSocketId).emit("newMessage", newMessage); // ✅ send to sender too
     }
 
     return res.status(200).json(newMessage);

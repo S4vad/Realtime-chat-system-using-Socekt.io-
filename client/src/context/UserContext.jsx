@@ -40,7 +40,7 @@ const UserProvider = ({ children }) => {
   }, []);
 
   return (
-    <UserContext.Provider value={{ userData, setUserData, loading,fetchMessages ,messages ,setSocket,setOnlineUsers ,socket,onlineUsers}}>
+    <UserContext.Provider value={{ userData, setUserData, loading,fetchMessages ,messages ,setSocket,setOnlineUsers ,socket,onlineUsers,setMessages}}>
       {children}
     </UserContext.Provider>
   );

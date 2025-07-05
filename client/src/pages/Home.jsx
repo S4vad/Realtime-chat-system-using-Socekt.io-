@@ -17,6 +17,7 @@ const Home = () => {
   const {
     fetchMessages,
     messages,
+    setMessages,
     userData,
     setSocket,
     setOnlineUsers,
@@ -47,7 +48,7 @@ const Home = () => {
         formData.append("image", backEndImage);
       }
       await axios.post("/send/" + chatUser._id, formData);
-      setInput(null);
+      setInput("");
       setFrontEndImage(null);
     } catch (error) {
       console.log(error);
@@ -91,6 +92,16 @@ const Home = () => {
       }
     }
   }, [userData]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("newMessage",(msg)=>{
+      setMessages((prev) => [...prev, msg]);
+
+    })
+    return ()=>socket.off("newMessage") 
+  }, [messages,setMessages]);
 
   return (
     <div className="w-full min-h-screen  ">
