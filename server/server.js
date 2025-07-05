@@ -12,8 +12,10 @@ import Conversation from "./models/conversation.model.js";
 import Message from "./models/message.model.js";
 import { getMessage, sendMessage } from "./controller/message.controller.js";
 import upload from "./confilg/multer.js";
+import { app ,server} from "./confilg/socket.js";
 
-const app = express();
+
+
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -112,7 +114,7 @@ app.get("/get-messages/:receiver", isAuth, getMessage);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   mongoConnect();
   console.log(`server port running successfully on port ${PORT}`);
 });

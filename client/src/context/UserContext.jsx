@@ -7,6 +7,9 @@ const UserProvider = ({ children }) => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [messages,setMessages]=useState([]);
+  const [socket,setSocket]=useState(null);
+  const [onlineUsers,setOnlineUsers]=useState(null);
+
 
 
   const fetchData = async () => {
@@ -37,7 +40,7 @@ const UserProvider = ({ children }) => {
   }, []);
 
   return (
-    <UserContext.Provider value={{ userData, setUserData, loading,fetchMessages ,messages }}>
+    <UserContext.Provider value={{ userData, setUserData, loading,fetchMessages ,messages ,setSocket,setOnlineUsers ,socket,onlineUsers}}>
       {children}
     </UserContext.Provider>
   );

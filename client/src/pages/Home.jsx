@@ -4,6 +4,7 @@ import { SenderMessage } from "../components/SenderMessage";
 import { ReceiverMessage } from "../components/receiverMessage";
 import axios from "axios";
 import { UserContext } from "../context/UserContext";
+import io from "socket.io-client";
 
 const Home = () => {
   const [users, setUsers] = useState([]);
@@ -13,7 +14,15 @@ const Home = () => {
   const [frontEndImage, setFrontEndImage] = useState(null);
   const [backEndImage, setBackEndImage] = useState(null);
   const image = useRef();
-  const { fetchMessages, messages, userData } = useContext(UserContext);
+  const {
+    fetchMessages,
+    messages,
+    userData,
+    setSocket,
+    setOnlineUsers,
+    onlineUsers,
+    socket,
+  } = useContext(UserContext);
 
   const onEmojiClick = (emojiData) => {
     setInput((prevInput) => prevInput + emojiData.emoji);
@@ -62,6 +71,27 @@ const Home = () => {
     getUsers();
   }, []);
 
+  useEffect(() => {
+    if (userData) {
+      const socketio = io("http://localhost:3000", {
+        query: {
+          userId: userData?._id,
+        },
+      });
+      setSocket(socketio);
+      socketio.on("getOnlineUsers", (users) => {
+        setOnlineUsers(users);
+      });
+
+      return () => socketio.close();
+    } else {
+      if (socket) {
+        socket.close();
+        setSocket(null);
+      }
+    }
+  }, [userData]);
+
   return (
     <div className="w-full min-h-screen  ">
       <nav className="w-full h-[50px] flex justify-end items-center p-8  text-2xl  font-semibold bg-slate-100 ">
@@ -74,12 +104,15 @@ const Home = () => {
             {users?.map((user, index) => (
               <li
                 key={index}
-                className="p-3 bg-slate-100  text-xl rounded-lg pl-15"
+                className="p-3 bg-slate-100  text-xl rounded-lg pl-15 relative"
                 onClick={async () => {
                   setChatUser(user);
                   await fetchMessages(user._id);
                 }}
               >
+                {onlineUsers?.includes(user._id) && (
+                  <span className="text-green-500 ml-2 absolute right-2 top-0">●</span>
+                )}
                 {user.firstName} {user.lastName}
               </li>
             ))}
