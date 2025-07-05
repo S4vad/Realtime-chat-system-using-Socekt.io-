@@ -1,6 +1,7 @@
 import React from "react";
 
 export const SenderMessage = ({ image, message }) => {
+  
   return (
     <div
       className=" w-fit max-w-[500px]  px-5 py-2 text-white text-5 bg-[#1797c2] rounded-tr-none

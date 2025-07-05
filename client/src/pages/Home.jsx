@@ -13,7 +13,10 @@ const Home = () => {
   const [input, setInput] = useState("");
   const [frontEndImage, setFrontEndImage] = useState(null);
   const [backEndImage, setBackEndImage] = useState(null);
+
   const image = useRef();
+  const scrollRef = useRef(null);
+
   const {
     fetchMessages,
     messages,
@@ -68,9 +71,19 @@ const Home = () => {
       .catch((error) => console.error("Error fetching users:", error));
   };
 
+
+  // scrolling when chat open or new message
+  const scrollToBottom = () => {
+    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   useEffect(() => {
-    getUsers();
+    getUsers()
   }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   useEffect(() => {
     if (userData) {
@@ -96,12 +109,11 @@ const Home = () => {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("newMessage",(msg)=>{
+    socket.on("newMessage", (msg) => {
       setMessages((prev) => [...prev, msg]);
-
-    })
-    return ()=>socket.off("newMessage") 
-  }, [messages,setMessages]);
+    });
+    return () => socket.off("newMessage");
+  }, [messages, setMessages]);
 
   return (
     <div className="w-full min-h-screen  ">
@@ -122,7 +134,9 @@ const Home = () => {
                 }}
               >
                 {onlineUsers?.includes(user._id) && (
-                  <span className="text-green-500 ml-2 absolute right-2 top-0">●</span>
+                  <span className="text-green-500 ml-2 absolute right-2 top-0">
+                    ●
+                  </span>
                 )}
                 {user.firstName} {user.lastName}
               </li>
@@ -139,7 +153,7 @@ const Home = () => {
               </div>
 
               {/* chats  */}
-              <div className="w-full h-[550px] flex flex-col p-6 gap-3 overflow-auto">
+              <div className="w-full h-[550px] flex flex-col p-6 gap-3 overflow-auto scrollbar-hide">
                 {showPicker && <EmojiPicker onEmojiClick={onEmojiClick} />}
                 {messages?.map((msg) =>
                   msg.sender === userData._id ? (
@@ -148,6 +162,7 @@ const Home = () => {
                     <ReceiverMessage image={msg.image} message={msg.message} />
                   )
                 )}
+                <div ref={scrollRef} />
               </div>
 
               {/* for showing selected image */}
